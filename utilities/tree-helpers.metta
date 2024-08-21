@@ -1,10 +1,8 @@
+;; This file contains helper functions that are specific to a tree data structure.
 !(import! &self list-helpers)
-;; -----------------------------------
-;; -----------------------------------
-;; -------- function to build a tree of type "Tree" from an expression
-;; -----------------------------------
-;; -----------------------------------
 
+;; Function to build a tree of type "Tree" from an expression
+(: buildTree (-> Expression Tree))
 (= (buildTree $expr) 
   (case $expr
     (
@@ -16,69 +14,45 @@
   )
 )
 
-;; -----------------------------------
-;; -----------------------------------
-;; -------- function to build a tree with a root node of "ROOT"
-;; -----------------------------------
-;; -----------------------------------
-
+;; Function to build a tree using the "buildTree" function but always appends a root node of type "ROOT".
+(: buildTreeWithRoot (-> Expression Tree))
 (= (buildTreeWithRoot $expr)
   (TreeNode (Value Nil False ROOT) Nil (Cons NilNode (Cons (buildTree $expr) Nil)))
 )
 
-;; -----------------------------------
-;; -----------------------------------
-;; -------- a function to get the right or left child
-;; -----------------------------------
-;; -----------------------------------
-
+;; A function to get the right or left child of a tree.
+;; The function assumes that the tree's first child is the left one and
+;; the second one is the right child. It ignores the rest of the children if present.
 (: getChild (-> Tree Location Tree))
 (= (getChild (TreeNode $nodeValue $guardSet Nil) $opt) NilNode)
 (= (getChild (TreeNode $nodeValue $guardSet (Cons $l $xs)) L) $l)
 (= (getChild (TreeNode $nodeValue $guardSet (Cons $l Nil)) R) NilNode)
 (= (getChild (TreeNode $nodeValue $guardSet (Cons $l (Cons $r $xs))) R) $r)
 
-;; -----------------------------------
-;; -----------------------------------
-;; -------- a function to get node children
-;; -----------------------------------
-;; -----------------------------------
-
+;; A function to get node children.
 (: getChildren (-> Tree (List Tree)))
 (= (getChildren (TreeNode $nodeVal $guardSet $children)) $children)
 
-;;A function to get node children at a given index
+;;A function to get child node of a tree at a given index
 (:getChildAt (-> Tree Number Tree))
 (= (getChildAt (TreeNode $nodeValue $guardSet Nil) $i) NilNode)
-
 (= (getChildAt (TreeNode $nodeValue $guardSet (Cons $x $xs)) $i)
-    ; (Cons $x $xs)
     (if (== Nil (index $i (Cons $x $xs)))
         NilNode
         (index $i (Cons $x $xs))
     )
 )
-;; -----------------------------------
-;; -----------------------------------
-;; -------- a function to get guardset
-;; -----------------------------------
-;; -----------------------------------
-
+;; A function to get guardset.
 (: getGuardSet (-> Tree (List Tree)))
 (= (getGuardSet (TreeNode $nodeValue $guardSet $children)) $guardSet)
 
-; Given a tree and the new type, it returns a new tree with the new type
+; Given a tree and the new type, it returns a new tree with the new type.
 (: changeType (-> Tree NodeType Tree))
 (= (changeType (TreeNode (Value $nodeValue $boolean $_) $guardSet $children) $newType)
   (TreeNode (Value $nodeValue $boolean $newType) $guardSet $children)
 )
 
-;; -----------------------------------
-;; -------- updateChild
-;; -------- Given a binary tree node and position (left, right) indicating which child to update, replace it's left or right child with the given node.
-;; -----------------------------------
-;; -----------------------------------
-
+;; Given a binary tree node and position (left, right) indicating which child to update, replace it's left or right child with the given node.
 ;; (node location (L or R) newNode)
 (: replaceChild (-> Tree Tree Location Tree))
 (= (replaceChild (TreeNode $nodeValue $guardSet Nil) $newNode L) 
@@ -97,23 +71,40 @@
   (TreeNode $nodeValue $guardSet (Cons $l (Cons $newNode $xs)))
 )
 
-;; replace child of a node goven an index
+;; replace child of a node goven an index.
 (:replaceChildAt (-> Tree Tree Number Tree))
 (= (replaceChildAt (TreeNode $nodeValue $guardSet $children) $newNode $i)
     (TreeNode $nodeValue $guardSet (replaceAtIndex $i $newNode $children))
 )
-;; -----------------------------------
-;; -------- Append Children
-;; -------- Given a node and a tree, append the tree to the node's children.
-;; -----------------------------------
-;; -----------------------------------
 
-
+;; Given a node and a tree, prepend the tree to the node's children.
 (: prependChild (-> Tree Tree Tree))
 (= (prependChild (TreeNode $nodeValue $guardSet $children) $child)
   (TreeNode $nodeValue $guardSet (Cons $child $children))
 )
 
+
+;; Given a tree and new guard set, it will return a new tree with the updated guard set.
+(: replaceGuardSet (-> Tree (List Tree) Tree) )
+(= (replaceGuardSet NilNode $newguardSet) NilNode)
+(= (replaceGuardSet (TreeNode $value $guardSet $children) $newguardSet) (TreeNode $value $newguardSet $children))
+
+;; Given a tree and new children, it will return a new tree with the updated children.
+(: replaceChildren (-> Tree (List Tree) Tree))
+(= (replaceChildren NilNode $newChildren) NilNode)
+(= (replaceChildren (TreeNode $value $guardSet $children) $newChildren) (TreeNode $value $guardSet $newChildren))
+
+;; Given a tree and the new node value, it will return a new tree with the updated node value.
+(: replaceNodeValue (-> Tree NodeValue Tree))
+(= (replaceNodeValue $tree $newValue)
+    (let ($value $left $right $guardSet $children) 
+        $node
+        (TreeNode $newValue $left $right $new-guardSet $children)
+    )
+)
+
+;; Given two tree nodes, it compares and returns boolean value by comparing only their value.
+;; A tree's value is the node value, constraint and the type of the node.
 (:isNodeEqual (-> Tree Tree Bool))
 (= (isNodeEqual NilNode NilNode) False)
 (= (isNodeEqual (TreeNode $nodeValue $guardSet $children) NilNode) False)
@@ -125,30 +116,20 @@
   (== $nodeValue1 $nodeValue2)
 )
 
-;;function to check if a tree is member of a treelist
+;; Function to check if a tree is member of a treelist.
 (: treeIsMember (-> Tree (List Tree) Bool))
 (= (treeIsMember $x $list)
    (memberWith isNodeEqual $x $list)
 )
 
-;;function to return the intersection of two treelists
+;;function to return the intersection of two treelists by comparing only their node value.
 (: treeIntersection (-> (List Tree) (List Tree) (List Tree)))
 (= (treeIntersection $list1 $list2)
-    (case $list1
-    (
-        (Nil Nil)
-        ((Cons $h $t) 
-         (if (treeIsMember $h $list2) 
-            (Cons $h (treeIntersection $t $list2)) 
-            (treeIntersection $t $list2)
-         ) 
-        )
-    )
-    )
+  (setIntersection treeIsMember $list1 $list2 Nil)
 )
 
-;;a function that computes intersection of lists of trees.
-;;This is taken from the Python implementation with the same name.
+;; A function that computes intersection of lists of trees.
+;; This is taken from the Python implementation with the same name.
 (: intersections (-> (List Tree) (List Tree) (List Tree)))
 (= (intersections $intersectionSet $children)
   (
@@ -165,127 +146,53 @@
   )
 )
 
-; ------------------------------------
-
-(: replaceGuardSet (-> Tree (List Tree) Tree) )
-(= (replaceGuardSet NilNode $newguardSet) NilNode)
-(= (replaceGuardSet (TreeNode $value $guardSet $children) $newguardSet) (TreeNode $value $newguardSet $children))
-
-(: replaceChildren (-> Tree (List Tree) Tree))
-(= (replaceChildren NilNode $newChildren) NilNode)
-(= (replaceChildren (TreeNode $value $guardSet $children) $newChildren) (TreeNode $value $guardSet $newChildren))
-
-(: replaceNodeValue (-> Tree NodeValue Tree))
-(= (replaceNodeValue $tree $newValue)
-    (let ($value $left $right $guardSet $children) 
-        $node
-        (TreeNode $newValue $left $right $new-guardSet $children)
-    )
-)
-
-(: changeTree (-> Tree Tree Tree))
-(= (changeTree $tree $newTree)
-    (case $newTree  (
-            ((TreeNode $newValue $newGuardSet $newChildren)
-                $newTree
-            )
-            (Nil Nil)
-            ($_ Error)
-
-        )
-    )
-)
-;; function that get the node types
+;; Function that gets the node type.
 (: getNodeType (-> Tree Atom))
 (= (getNodeType (TreeNode (Value $value $bool $nodeType) $guardSet $children)) $nodeType)
 
-;; function that get the node value
+;; Function that gets the node value.
 (: getNodeValue (-> Tree Atom))
 (= (getNodeValue (TreeNode (Value $value $truthValue $nodeType) $guardSet $children)) $value)
 
-(: compareTrees (-> Tree Tree Bool))
-(= (compareTrees $fstTree $sndTree)
-  (if (nodeEquality $fstTree $sndTree) True False)
-)
-
-(: compareAndRemoveNode (-> Tree (List Tree) (List Tree) (List Tree)))
-(= (compareAndRemoveNode $tree Nil $accumulator) $accumulator)
-(= (compareAndRemoveNode $tree (Cons $x $xs) $accumulator)
-  (if (compareTrees $tree $x)
-    (compareAndRemoveNode $tree $xs $accumulator)
-    (compareAndRemoveNode $tree $xs (extend $accumulator (Cons $x Nil)))
-  )
-)
-
-(= (treeFoldl $func $acc NilNode) $acc)
-(= (treeFoldl $func $acc (TreeNode $nodeVal $leftTree $rightTree $guardSet $children))
-  (case $nodeVal
-    (
-      ( (Value $val $truthVal LITERAL) 
-        ($func $acc $val)
-      )
-      ( (Value $val $truthVal ROOT)
-        (treeFoldl $func $acc $rightTree)
-      )
-      ( (Value $val $truthVal NOT)
-        (treeFoldl $func $acc $rightTree)
-      )
-      ( (Value $val $truthVal AND)
-        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
-      )
-      ( (Value $val $truthVal OR)
-        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
-      )
+;; Function to find a given node from a list of nodes and remove it. 
+;; Similar to findAndRemove implementation of for the lists except it only works for trees.
+(: findAndRemoveTree (-> Tree (List Tree) (List Tree)))
+(= (findAndRemoveTree $elem Nil) Nil)
+(= (findAndRemoveTree $elem (Cons $x $xs))
+    (if (isNodeEqual $x $elem)
+        (findAndRemoveTree $elem $xs)
+        (Cons $x (findAndRemoveTree $elem $xs))
     )
-  )
 )
 
-(= (treeFoldr $func $acc NilNode) $acc)
-(= (treeFoldr $func $acc (TreeNode $nodeVal $leftTree $rightTree $guardSet $children))
-  (case $nodeVal
-    (
-      ( (Value $val $truthVal LITERAL) ($func $acc $val) )
-      ( (Value $val $truthVal ROOT) (treeFoldl $func $acc $rightTree) )
-      ( (Value $val $truthVal NOT) (treeFoldl $func $acc $rightTree) )
-      ( (Value $val $truthVal AND)
-        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
-      )
-      ( (Value $val $truthVal OR)
-        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
-      )
-    )
-  )
-)
-
-; ------ Update GrandChild guardset with the difference between the current guardset(list of trees) and the given list of trees
+; Update GrandChild guardset with the difference between the current guardset and the given list of trees.
 (: computeGrandchildGuardset (-> Tree (List Tree) Tree))
 (= (computeGrandchildGuardset NilNode $resultSet) NilNode)
 (= (computeGrandchildGuardset (TreeNode $nodeValue $guardSet $children) $resultSet)
   (TreeNode $nodeValue (setDifference treeIsMember $guardSet $resultSet Nil) $children)
 )
 
-; A function that detect consistency(value match and constrient difference) between a single tree and list of tree
+;; A function that detect consistency (value match and constraint difference) between a single tree and list of tree.
 (: detectConsistency (-> Tree (List Tree) Bool))
 (= (detectConsistency $tree Nil) True)
 (= (detectConsistency 
     (TreeNode (Value $fstValue $fstConstraint $fstNodetype) $fstGuardSet $fstChildren)
     (Cons (TreeNode (Value $sndValue $sndConstraint $sndNodetype) $sndGuardSet $sndChildren) $restOfTree)
    )
-
-  (if 
-    (and 
-      (== $fstValue $sndValue) 
-      (not (== $fstConstraint $sndConstraint))
-    )
-      False
-      (detectConsistency 
-        (TreeNode (Value $fstValue $fstConstraint $fstNodetype) $fstGuardSet $fstChildren) 
-        $restOfTree
-      )
-  )
+   (if 
+     (and 
+       (== $fstValue $sndValue) 
+       (not (== $fstConstraint $sndConstraint))
+     )
+       False
+       (detectConsistency 
+         (TreeNode (Value $fstValue $fstConstraint $fstNodetype) $fstGuardSet $fstChildren) 
+         $restOfTree
+       )
+   )
 )
 
-; A function check the consistency of a tree list 
+;; A function check the consistency of a tree list.
 (: isConsistent (-> (List Tree) Bool))
 (= (isConsistent Nil) True)
 (= (isConsistent (Cons $x $xs))
@@ -335,28 +242,74 @@
 (= (prependToGuardSet (TreeNode $nodeValue $guardSet $children) $node)
   (TreeNode $nodeValue (Cons $node $guardSet) $children)
 )
+
 ;; Returns a boolean value after it compares two trees.
+;; This implementation doesn't assume a set is ordered and checks if
+;; both sets are identical.
 (: compareSets (-> (List Tree) (List Tree) Bool))
 (=(compareSets $firstSet $secondSet)
-  (let*(
+  (let*
+    (
       ($firstDifference (setDifference treeIsMember $firstSet $secondSet Nil))
       ($secondDifference (setDifference treeIsMember $secondSet $firstSet Nil))
-    )(if (and (== $firstDifference Nil) (== $secondDifference Nil))
+    )
+    (if (and (== $firstDifference Nil) (== $secondDifference Nil))
       True
       False
     )
   )
 )
-;;retrieves for the head of Children in a List of tree given a tree
+;; Retrieves for the head of Children in a List of tree given a tree
 (: headOfChildren (-> (List Tree) Tree))
 (= (headOfChildren Nil) NilNode)
 (= (headOfChildren (Cons $x $xs))
   $x
 )
-;;retrieves for the tail of Children in a tree it provides a list of tree.
+;; Retrieves for the tail of Children in a tree it provides a list of tree.
 (: tailOfChildren (-> Tree (List Tree)))
 (= (tailOfChildren NilNode) Nil)
 (= (tailOfChildren (TreeNode $nodeValue $guardSet $children))
     (let (Cons $x $xs) $children $xs)
 )
 
+;; A tree left fold funcction that works like tree fold in haskell.
+(= (treeFoldl $func $acc NilNode) $acc)
+(= (treeFoldl $func $acc (TreeNode $nodeVal $leftTree $rightTree $guardSet $children))
+  (case $nodeVal
+    (
+      ( (Value $val $truthVal LITERAL) 
+        ($func $acc $val)
+      )
+      ( (Value $val $truthVal ROOT)
+        (treeFoldl $func $acc $rightTree)
+      )
+      ( (Value $val $truthVal NOT)
+        (treeFoldl $func $acc $rightTree)
+      )
+      ( (Value $val $truthVal AND)
+        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
+      )
+      ( (Value $val $truthVal OR)
+        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
+      )
+    )
+  )
+)
+
+;; A tree right fold funcction that works like tree fold in haskell.
+(= (treeFoldr $func $acc NilNode) $acc)
+(= (treeFoldr $func $acc (TreeNode $nodeVal $leftTree $rightTree $guardSet $children))
+  (case $nodeVal
+    (
+      ( (Value $val $truthVal LITERAL) ($func $acc $val) )
+      ( (Value $val $truthVal ROOT) (treeFoldl $func $acc $rightTree) )
+      ( (Value $val $truthVal NOT) (treeFoldl $func $acc $rightTree) )
+      ( (Value $val $truthVal AND)
+        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
+      )
+      ( (Value $val $truthVal OR)
+        (treeFoldl $func (treeFoldl $func $acc $leftTree) $rightTree)
+      )
+    )
+  )
+)
