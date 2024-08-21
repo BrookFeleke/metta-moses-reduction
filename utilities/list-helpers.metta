@@ -80,25 +80,6 @@
 (= (extend Nil $ys) $ys)
 (= (extend (Cons $x $xs) $ys) (Cons $x (extend $xs $ys)))
 
-;; Function to partition the list. 
-;; This function will split the list into two parts based on a given pivot element.
-(: partition (-> Atom (List $t) ( (List $t) (List $t) )))
-(= (partition $_ Nil) ( Nil Nil ))
-(= (partition $pivot (Cons $x $xs))
-    (let ($left $right) (partition $pivot $xs)
-        (let*
-            (
-              ($cond  (<= $x $pivot))
-              ( () (println! ($x "<= " $pivot "= " $cond)))
-              ( () (println! ($left "---" $right)))
-            )
-            (if $cond
-                ( (Cons $x $left) $right)
-                ($left (Cons $x $right))
-            )
-        )
-    )
-)
 
 ;; A function that checks if at least one True exists from a Boolean list.
 ;; The function will stop execution as soon as it finds a True value.
@@ -148,8 +129,28 @@
     )
 )
 
+;; Function to partition the list. 
+;; This function will split the list into two parts based on a given pivot element.
+(: partition (-> Atom (List $t) ( (List $t) (List $t) )))
+(= (partition $_ Nil) ( Nil Nil ))
+(= (partition $pivot (Cons $x $xs))
+    (let ($left $right) (partition $pivot $xs)
+        (let*
+            (
+              ($cond  (<= $x $pivot))
+              ( () (println! ($x "<= " $pivot "= " $cond)))
+              ( () (println! ($left "---" $right)))
+            )
+            (if $cond
+                ( (Cons $x $left) $right)
+                ($left (Cons $x $right))
+            )
+        )
+    )
+)
+
 ;; QuickSort implementation
-(: quickSort (-> List List))
+(: quickSort (-> (List $t) (List $t)))
 (= (quickSort Nil) Nil)
 (= (quickSort (Cons $x $xs))
     (let ($left $right) (partition $x $xs)
@@ -157,6 +158,7 @@
     )
 )
 
+;; Function to check if the list doesn't contain duplicate element.
 (: checkNotDuplicated (-> (List $t) Bool))
 (= (checkNotDuplicated $list)
     (case $list
@@ -190,20 +192,13 @@
 
 ;; A function that takes two lists and returns their common elements.
 (: intersect (-> (List $t) (List $t) (List $t) (List $t)))
-(=(intersect $list1 $list2 $accumulator)
-    (if (and (isEmpty $list1) (isEmpty $list2))
-        $accumulator
-        (case $list1
-          (
-            ( (Cons $x $xs)
-                (if (== (member $x $list2) True)
-                    (intersect $xs $list2 (extend $accumulator (Cons $x Nil)))
-                    (intersect $xs $list2 $accumulator)
-                )
-            )
-            (Nil $accumulator)
-          )
-        )
+(= (intersect Nil Nil $accumulator) $accumulator)
+(= (intersect Nil (Cons $y $ys) $accumulator) $accumulator)
+(= (intersect (Cons $x $xs) Nil $accumulator) $accumulator)
+(= (intersect (Cons $x $xs) (Cons $y $ys) $accumulator)
+    (if (member $x (Cons $y $ys))
+        (intersect $xs (Cons $y $ys) (extend $accumulator (Cons $x Nil)))
+        (intersect $xs (Cons $y $ys) $accumulator)
     )
 )
 
