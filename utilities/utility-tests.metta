@@ -92,9 +92,9 @@
 
  ; !(setUnion (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 5 (Cons 6 (Cons 7 (Cons 1 Nil)))) )
 
- ; !(intersect (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 5 (Cons 6 (Cons 7 (Cons 1 Nil)))) Nil)
- ; !(intersect (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 1 (Cons 4 (Cons 5 (Cons 6 Nil)))) Nil)
- ; !(intersect (Cons a (Cons b (Cons c Nil))) (Cons c (Cons d (Cons e (Cons f Nil)))) Nil)
+ ; !(setIntersection member (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 5 (Cons 6 (Cons 7 (Cons 1 Nil)))) Nil)
+ ; !(setIntersection member (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 1 (Cons 4 (Cons 5 (Cons 6 Nil)))) Nil)
+ ; !(setIntersection member (Cons a (Cons b (Cons c Nil))) (Cons c (Cons d (Cons e (Cons f Nil)))) Nil)
 
  ; !(setDifference member (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))) (Cons 5 (Cons 6 (Cons 7 (Cons 1 Nil)))) Nil)
  ; !(setDifference member (Cons a (Cons b (Cons c Nil))) (Cons c (Cons d (Cons e (Cons f Nil)))) Nil)
@@ -420,10 +420,10 @@
  ;; !(containsTerminalAndNode (Cons (TreeNode (Value Nil False OR) Nil Nil) Nil))
 
 
-!(intersections 
-                (Cons (TreeNode (Value Nil False AND) (Cons (TreeNode (Value A False LITERAL)) Nil ) Nil) (Cons (TreeNode (Value Nil False AND) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil)) Nil))
-                (Cons (TreeNode (Value A False LITERAL) (Cons (TreeNode (Value F False LITERAL) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil) Nil) Nil) Nil) (Cons (TreeNode (Value B True LITERAL) Nil Nil) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil)))
-)
+;;!(intersections 
+;;                 (Cons (TreeNode (Value Nil False AND) (Cons (TreeNode (Value A False LITERAL)) Nil ) Nil) (Cons (TreeNode (Value Nil False AND) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil)) Nil))
+;;                 (Cons (TreeNode (Value A False LITERAL) (Cons (TreeNode (Value F False LITERAL) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil) Nil) Nil) Nil) (Cons (TreeNode (Value B True LITERAL) Nil Nil) (Cons (TreeNode (Value F False LITERAL) Nil Nil) Nil)))
+;; )
 
 ;; -----------------------------------
 

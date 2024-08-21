@@ -60,7 +60,7 @@
         (case $exp(
                 (($op $exp1 $exp2)
                     (if (== $op AND)
-                         (isEmpty (intersect (get-guard-set $exp1) (get-guard-set $exp2) Nil))
+                         (isEmpty (setIntersection == (get-guard-set $exp1) (get-guard-set $exp2) Nil))
                         False
                     )
                 )
@@ -109,7 +109,7 @@
         (case $exp (
                 (($op $exp1 $exp2)
                     (if (== $op OR)
-                        (isEmpty (intersect (get-guard-set $exp1) (get-guard-set $exp2) Nil))
+                        (isEmpty (setIntersection == (get-guard-set $exp1) (get-guard-set $exp2) Nil))
                         False
                     )
                 )

@@ -80,6 +80,9 @@
 (= (extend Nil $ys) $ys)
 (= (extend (Cons $x $xs) $ys) (Cons $x (extend $xs $ys)))
 
+(: prepend (-> $t (List $t) (List $t)))
+(= (prepend $x $xs) (Cons $x $xs))
+
 
 ;; A function that checks if at least one True exists from a Boolean list.
 ;; The function will stop execution as soon as it finds a True value.
@@ -190,15 +193,15 @@
     )
 )
 
-;; A function that takes two lists and returns their common elements.
-(: intersect (-> (List $t) (List $t) (List $t) (List $t)))
-(= (intersect Nil Nil $accumulator) $accumulator)
-(= (intersect Nil (Cons $y $ys) $accumulator) $accumulator)
-(= (intersect (Cons $x $xs) Nil $accumulator) $accumulator)
-(= (intersect (Cons $x $xs) (Cons $y $ys) $accumulator)
-    (if (member $x (Cons $y $ys))
-        (intersect $xs (Cons $y $ys) (extend $accumulator (Cons $x Nil)))
-        (intersect $xs (Cons $y $ys) $accumulator)
+;; A function that takes two lists, a member function and returns their common elements.
+(: setIntersection (-> (-> $t (List $t) Bool) (List $t) (List $t) (List $t) (List $t)))
+(= (setIntersection $memberFunc Nil Nil $accumulator) $accumulator)
+(= (setIntersection $memberFunc Nil (Cons $y $ys) $accumulator) $accumulator)
+(= (setIntersection $memberFunc (Cons $x $xs) Nil $accumulator) $accumulator)
+(= (setIntersection $memberFunc (Cons $x $xs) (Cons $y $ys) $accumulator)
+    (if ($memberFunc $x (Cons $y $ys))
+        (setIntersection $memberFunc $xs (Cons $y $ys) (prepend $x $accumulator))
+        (setIntersection $memberFunc $xs (Cons $y $ys) $accumulator)
     )
 )
 
