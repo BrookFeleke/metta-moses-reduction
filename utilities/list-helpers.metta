@@ -274,16 +274,9 @@
 
 ;; A function that takes a binary function, an initial accumulator value and a list
 ;; and flattens the list into a single value by applying the function recursively.
-(: foldLeft (-> (-> $t $t $t) $t (List $t) $t))
-(= (foldLeft $func $acc Nil) $acc)
-(= (foldLeft $func $acc (Cons $x $xs)) (foldLeft $func ($func $acc $x) $xs))
-
-;; An Abstract function to call foldLeft function and pass the first element as the initial accumulator (does not require an accumulator)
-(: foldl (-> $t $t $t) (List $t) $t)
-(= (foldl $func Nil)Nil)
-(= (foldl $func (Cons $x $xs))
-    (foldLeft $func $x $xs)
-)
+(: foldl (-> (-> $t $t $t) $t (List $t) $t))
+(= (foldl $func $acc Nil) $acc)
+(= (foldl $func $acc (Cons $x $xs)) (foldl $func ($func $acc $x) $xs))
 
 ;; Function to remove an element at a given index from a List.
 (: removeAtIndex (-> Number (List $t) (List $t)))
